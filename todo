@@ -1,0 +1,12 @@
+calc
+sim eq 2eq
+display simeq ans
+sim eq 3eq
+cartesian graph
+parametric graph
+show graph
+SCREEN SWITCHING
+statistics:
+    normal 
+    binomial
+    

@@ -1,0 +1,85 @@
+
+class Calculate:
+
+    SUBROUTINE __init__(self, config: dict, vars=None):
+        if vars = None:
+            self.vars<--{}
+        else:
+            self.vars<--vars
+
+    SUBROUTINE computeExpression(self, expression):
+        r<--RPN(expression, self.vars)
+
+        return self.computeRPN(r)
+
+    SUBROUTINE computeRPN(self, RPN):
+        paramStack<--Stack()
+        print(f'rpn stack: {RPN.rpn}')
+        for item in RPN.rpn:
+            # print(item)
+
+            if item not in precedence:
+                paramStack.push(item)
+            else:
+
+                                    # need to computer whatever operator is in here
+                # print(f'ITEM IS {item}')
+                if item != 'sin' and item != 'cos' and item != 'tan':
+                    x<--paramStack.pop()
+                    y<--paramStack.pop()
+                    print(f'x: {x}, y: {y}')
+                    res<--self.computeOp(x, y, item)
+                    paramStack.push(res)
+                else:
+                    x<--paramStack.pop()
+                    res<--self.computeTrig(item, x)
+                    paramStack.push(res)
+
+        return paramStack.pop()
+
+    SUBROUTINE findInput(self, op1):
+        # gets value out of saved vars if it is not a number
+        try:
+            op1<--float(op1)
+        except Exception:
+            if op1 in self.vars:
+                op1<--float(self.vars[op1])
+            elif op1.find('x')!=-1:
+                i=op1.find('x') 
+                coef<--float(op1[:i])
+                x=self.findInput('x')
+                op1=x*coef
+            else:
+                op1<--None  # error, the var isnt defined
+        return op1
+
+    SUBROUTINE computeOp(self, op1, op2, symb):
+
+
+        op2<--self.findInput(op2)
+
+        if symb = '+':
+            return op1+op2
+
+        elif symb = '*':
+            return op1*op2
+        elif symb = '-':
+            return op2-op1
+        elif symb = '/':
+            return op2/op1
+        elif symb = '^':
+            return op2**op1
+
+    SUBROUTINE computeTrig(self, func, x):
+        x<--self.findInput(x)
+        if func = 'sin':
+            return math.sin(float(x))
+        elif func = 'cos':
+            return math.cos(float(x))
+        else:
+            return math.tan(float(x))
+
+    SUBROUTINE retrieveVariable(self, var):
+        val<--utils.readSetting(var)
+        return val
+
