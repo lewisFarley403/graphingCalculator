@@ -133,15 +133,29 @@ class Calculate:
         # return calc.computeExpression('x-(1/(3*2))x^3+(1/(5*4*3*2))x^5')
 
     def sin(self, x):
-        # return self.trigBuilder(x, lambda i: 2*i+1)
-
-        # print(f'in sin function: x={x} sin(90) = {math.sin(math.pi)}')
-        return round(math.sin(x),4)
+        x = x % (2 * math.pi)  # Reduce the angle to the range (-2*pi, 2*pi)
+        n = 100  # Number of terms in the series
+        sin_x = 0
+        for i in range(n):
+            sin_x += (-1)**i * x**(2*i+1) / math.factorial(2*i+1)
+        return sin_x
 
     def cos(self, x):
-        # return self.trigBuilder(x, lambda i: 2*i)
-        return round(math.cos(x),4)
+        x = x % (2 * math.pi)  # Reduce the angle to the range (-2*pi, 2*pi)
+        n = 10  # Number of terms in the series
+        cos_x = 0
+        for i in range(n):
+            cos_x += (-1)**i * x**(2*i) / math.factorial(2*i)
+        return cos_x
+    def tan(self,x):
+        sin_x = self.sin(x)
+        cos_x = self.cos(x)
+        return sin_x/cos_x
+'''In this code, the Calculate class is defined to perform mathematical calculations on expressions. The __init__ function initializes an instance of the Calculate class and creates an empty dictionary to store variables and their values. The computeExpression and computeRPN functions take an input expression and compute its value using Reverse Polish Notation (RPN) representation. The computeOp and computeTrig functions are used to perform mathematical operations and trigonometric functions, respectively. The findInput function retrieves the value of a variable from the dictionary of stored variables if it exists, and the retrieveVariable function is used to retrieve values for specific variables. The stringFactorial function returns a string representation of a factorial operation.
 
+The Stack class from the utils module is used to implement a stack data structure, which is a linear data structure that allows for the insertion and removal of elements in a last-in, first-out (LIFO) manner. This data structure is used to store and manipulate the operands and operators in the RPN representation of the input expression. The precedence dictionary from the config module is used to define the order of operations for the mathematical calculations performed by the Calculate class. The RPN class from the rpn module is used to convert infix expressions to RPN representation.
+
+These data structures were chosen to support the operations performed by the Calculate class, including the conversion of expressions to RPN representation and the evaluation of RPN expressions using a stack data structure. The Stack class and the precedence dictionary are used specifically to support the evaluation of RPN expressions, while the RPN class is used to convert infix expressions to RPN representation for easier evaluation.'''
 
 class CartGraphing:
     def __init__(self, function):
@@ -239,20 +253,13 @@ def solveSystemsOfEqNp(vars, equations, answers):
     return result
 
 
-# class Matrix:
-#     def __init__(self):
-#         self.data = []
-#     def addEquation(self,coefficients):
-#         self.data.append(coefficients)
-#     def determinant3x3(self):
-#         pass
-#     def determinant2x2(self,minor):
-#         #minor: a small 2x2 matrix
-#         a=minor[0][0]
-#         b=minor[1][-1]
-#         c = minor[0][-1]
-#         d=minor[1][-1]
-#         return a*d -b*c #formula of a determinant
+'''In this code, the Matrix class and its Matrix2x2 subclass are defined to represent and manipulate matrices. The __init__ function initializes an instance of the Matrix class and creates an empty list to store the elements of the matrix. The addEquation function adds a row of coefficients to the matrix, and the dot function performs a dot product of two matrices. The scalar function multiplies all elements of the matrix by a scalar value, and the hasValidSolutions function checks if the matrix has a valid solution by checking if its determinant is zero.
+
+The Matrix2x2 subclass extends the Matrix class to support operations on 2x2 matrices, including the getDeterminant function, which computes the determinant of a 2x2 matrix, and the invert function, which inverts the matrix.
+
+The data list is used to store the elements of the matrix, with each element of the list representing a row of the matrix. This data structure is used to store the elements of the matrix and support operations on the matrix, such as dot products and inversion. The eq variable is used to store a row of coefficients when adding an equation to the matrix, and the scalar variable is used to store the scalar value that will be used to multiply the elements of the matrix.
+
+These data structures were chosen to support the operations performed by the Matrix and Matrix2x2 classes, including the storage and manipulation of matrices. The data list is used to store the elements of the matrix, and the eq and scalar variables are used to support operations on the matrix.'''
 
 class Matrix:
     def __init__(self):
@@ -452,6 +459,13 @@ def solveSystemOf3Eq(equations, answers):
     m1.invert()
     return m1.dot(m2)
 
+'''In this code, the Matrix class and its Matrix2x2 subclass are defined to represent and manipulate matrices. The __init__ function initializes an instance of the Matrix class and creates an empty list to store the elements of the matrix. The addEquation function adds a row of coefficients to the matrix, and the dot function performs a dot product of two matrices. The scalar function multiplies all elements of the matrix by a scalar value, and the hasValidSolutions function checks if the matrix has a valid solution by checking if its determinant is zero.
+
+The Matrix2x2 subclass extends the Matrix class to support operations on 2x2 matrices, including the getDeterminant function, which computes the determinant of a 2x2 matrix, and the invert function, which inverts the matrix.
+
+The data list is used to store the elements of the matrix, with each element of the list representing a row of the matrix. This data structure is used to store the elements of the matrix and support operations on the matrix, such as dot products and inversion. The eq variable is used to store a row of coefficients when adding an equation to the matrix, and the scalar variable is used to store the scalar value that will be used to multiply the elements of the matrix.
+
+These data structures were chosen to support the operations performed by the Matrix and Matrix2x2 classes, including the storage and manipulation of matrices. The data list is used to store the elements of the matrix, and the eq and scalar variables are used to support operations on the matrix.'''
 
 if __name__ == '__main__':
     # param = ParametricGraphing(

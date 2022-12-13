@@ -3,7 +3,6 @@ from texRenderWidget import TexText
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWebEngineWidgets import QWebEngineView
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from functionalityPages import Calculate, solveSystemsOf2Eq, solveSystemOf3Eq

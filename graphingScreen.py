@@ -3,7 +3,6 @@ from simultaneousEquations import EquationViewer
 from functionalityPages import Calculate, solveSystemsOf2Eq, CartGraphing, ParametricGraphing
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5 import QtCore, QtGui, QtWidgets
 from texRenderWidget import TexText, TexTextWithDomain
 from threading import main_thread

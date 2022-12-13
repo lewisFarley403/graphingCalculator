@@ -12,28 +12,33 @@ from config import precedence
 
 class RPN:
     def __init__(self, exp, variables):
+        # Store the expression and variables in instance variables
         self.variables = variables
         self.exp = exp
         self.precedence = precedence
+        # Create a list of tokens (operators, parentheses, and variables)
         self.tokens = list(self.precedence.keys())
         self.tokens.append('(')
         self.tokens.append(')')
+        # Convert the expression to RPN and store it in an instance variable
         self.rpn = self.CreateRPN(self.exp)
 
     def tokenise(self, exp):
-        # adapted the algorithm from https://www.andreinc.net/2010/10/05/converting-infix-to-rpn-shunting-yard-algorithm
+        # Adapted from https://www.andreinc.net/2010/10/05/converting-infix-to-rpn-shunting-yard-algorithm
+        # Remove spaces from the expression
         exp = exp.replace(' ', '')
         precedence = self.precedence
         tokens = self.tokens
         newExp = ''
-        # split on the spaces, 3+4-> 3 + 4 so that all the symbols and numbers can be tokenised
+        # Insert spaces before and after each token
         for token in tokens:
             for char in exp:
                 if char == token:
-                    # space at the start incase the symbol follows from a number, numbers wont have spaces because theyre not in the token array
+                    # Space at the start in case the symbol follows from a number
                     newExp += f' {char} '
                 else:
-                    newExp += char  # its a number
+                    newExp += char  # It's a number
+                    
             exp = newExp  # ready to repeat for the next character
 
             newExp = ''
@@ -46,51 +51,6 @@ class RPN:
             if t != '':
                 newTokenised.append(t)
         tokenised = newTokenised
-
-        # sort out negative numbers
-
-        # best if - not in precedence
-        # # possible erroneous ouputs erroneous because cant cast to integer,
-        # # a-b: compute replace with [a,-,b]
-        # # a--b : replace with [a,+,b]
-        # newTokens = []
-        # for t in tokenised:
-        #     print(t)
-        #     if t != '-':
-        #         # print(len(re.findall('-', t)))
-
-        #         if len(re.findall('-', t)) == 0:
-        #             # has nothing to do with negative numbers
-        #             newTokens.append(t)
-        #         elif len(re.findall('-', t)) == 1:
-
-        #             split = t.split('-')
-
-        #             # print(split)
-        #             if split[0] != '':
-        #                 newTokens.append(split[0])
-        #                 newTokens.append('-')
-
-        #                 newTokens.append(split[1])
-        #             else:
-        #                 # means its just a minus number ie -9
-        #                 newTokens.append('-'+split[1])
-        #         else:
-        #             # -- is same as plus
-        #             split = t.split('--')
-        #             # print(split)
-
-        #             newTokens.append(split[0])
-        #             newTokens.append('+')
-
-        #             newTokens.append(split[1])
-
-        # - in pres
-        # idea: alter what the minuses mean
-
-        # case one: [a,-,b]: leave it
-        # case 2 [-,-,a]: +a
-        # [-,a,SYMBOL]: [-a,SYMBOL] because
 
         newTokenised = []
         skip = False
