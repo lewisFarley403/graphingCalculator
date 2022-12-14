@@ -58,9 +58,15 @@ class SimScreen2Eq(calculateScreen.Ui_MainWindow):
             # solveSystemsOf2Eq([self.eq1View.unknowns[0:1], self.eq2View.unknowns[0:1]], [
             #                   [self.eq1View.unknowns[2]], self.eq2View.unknowns[2]])
             res = solveSystemsOf2Eq([eq1, eq2], [ans1, ans2])
-            x = res[0][0]
-            y = res[1][0]
-            print(x, y)
+            print(res == None)
+            if res == None:
+                l = QtWidgets.QLabel('NO SOLUTIONS')
+            else:
+                x = res[0][0]
+                y = res[1][0]
+                print(x, y)
+                l = QtWidgets.QLabel(f'x = {x}, y = {y}')
+            self.graphLayout.addWidget(l)
             # set answers on screen here
 
         else:
@@ -109,8 +115,14 @@ class simScreen3Eq(SimScreen2Eq):
             ans1 = float(self.eq1View.unknowns[-1])
             ans2 = float(self.eq2View.unknowns[-1])
             ans3 = float(self.eq3View.unknowns[-1])
-            x, y, z = solveSystemOf3Eq([eq1, eq2, eq3], [ans1, ans2, ans3])
-            print(x, y, z)
+            res = solveSystemOf3Eq([eq1, eq2, eq3], [ans1, ans2, ans3])
+            if res == None:
+                self.l = QtWidgets.QLabel('NO SOLUTIONS')
+            else:
+                x, y, z = res
+                print(x, y, z)
+                self.l = QtWidgets.QLabel(f'x = {x}, y = {y}, z = {z}')
+            self.graphLayout.addWidget(self.l)
             # set answers on screen here
 
     def setupUi(self, MainWindow):
