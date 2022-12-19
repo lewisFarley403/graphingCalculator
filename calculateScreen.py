@@ -15,6 +15,7 @@ from matplotlib.figure import Figure
 from functionalityPages import Calculate
 from texRenderWidget import TexText
 # import switchingWidget
+from PyQt5.QtWidgets import QMessageBox
 
 WIDTH = 800
 HEIGHT = 800
@@ -113,7 +114,7 @@ class Ui_MainWindow(QtWidgets.QWidget):
         self.no5.clicked.connect(lambda: self.refreshDisplay('5'))
 
         self.div = QtWidgets.QPushButton(self.gridLayoutWidget)
-        self.div.setObjectName("div")
+        self.div.setObjectName("÷")
         self.gridLayout.addWidget(self.div, 1, 4, 1, 1)
         self.div.clicked.connect(lambda: self.refreshDisplay('/'))
 
@@ -323,7 +324,7 @@ class Ui_MainWindow(QtWidgets.QWidget):
         self.sub.setText(_translate("MainWindow", "-"))
 
         self.no6.setText(_translate("MainWindow", "6"))
-        self.mult.setText(_translate("MainWindow", "X"))
+        self.mult.setText(_translate("MainWindow", "MULT"))
         self.pushButton_5.setText(_translate("MainWindow", "DEL"))
         self.no1.setText(_translate("MainWindow", "1"))
         self.no2.setText(_translate("MainWindow", "2"))
@@ -367,8 +368,21 @@ class Ui_MainWindow(QtWidgets.QWidget):
 
     def forEqual(self):
         print(f'COMPUTING {self.expressionForCalc}')
-        result = self.calc.computeExpression(self.expressionForCalc)
-        self.texRender.setAnswer(str(result))
+        try:
+            result = self.calc.computeExpression(self.expressionForCalc)
+            self.texRender.setAnswer(str(result))
+        except Exception as e:
+            print(e)
+            msg = QMessageBox()
+
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Error")
+            if str(e) == 'float division by zero':
+                msg.setInformativeText('Divide by 0 error!')
+            else:
+                msg.setInformativeText('Invalid expression')
+            msg.setWindowTitle("Error")
+            msg.exec_()
 
 
 if __name__ == "__main__":

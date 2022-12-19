@@ -12,6 +12,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from functionalityPages import Calculate
 import matplotlib.pyplot as plt
+from typing import Optional
 
 
 class TexText(QtWidgets.QWidget):
@@ -23,7 +24,7 @@ class TexText(QtWidgets.QWidget):
     the answer to the equation.
     """
 
-    def __init__(self, parent: Optional[QWidget] = None):
+    def __init__(self, parent: Optional["QWidget"] = None):
         """Initialize the TexText widget.
 
         Args:
@@ -75,6 +76,7 @@ class TexText(QtWidgets.QWidget):
 
     def setAnswer(self, ans):
         self.answer = ans
+        ans = str(round(float(ans), 4))
         self.refreshCanvas('')
 
     def getEquation(self):

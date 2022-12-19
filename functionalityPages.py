@@ -150,33 +150,48 @@ class Calculate:
         else:
             return round(self.tan(float(x)), 4)
 
+    # def stringFactorial(self, x):
+    #     s = ''
+    #     for i in range(1, x+1):
+    #         s += f'{i}*'
+    #     return s[:-1]
+
+    # def trigBuilder(self, x, nTerm):
+    #     x %= math.pi/2
+    #     calc = Calculate({}, vars={'x': x})
+    #     string = ''
+    #     for i in range(100):
+    #         n = nTerm(i)
+    #         # print(n)
+    #         sign = (-1) ** i
+    #         fact = self.stringFactorial(n)
+    #         if sign > 0 and len(string) != 0:
+    #             string += f'+(1/({fact}))x^{n}'
+    #         elif sign < 0 and len(string) != 0:
+    #             string += f'-(1/({fact}))x^{n}'
+    #         else:
+    #             string += 'x'
+    #     return calc.computeExpression(string)
+    #     # return calc.computeExpression('x-(1/(3*2))x^3+(1/(5*4*3*2))x^5')
     def retrieveVariable(self, var):
         val = utils.readSetting(var)
         return val
 
-    def stringFactorial(self, x):
-        s = ''
-        for i in range(1, x+1):
-            s += f'{i}*'
-        return s[:-1]
+    def factorial(self, n: int) -> int:
+        """
+        Compute the factorial of a non-negative integer n.
 
-    def trigBuilder(self, x, nTerm):
-        x %= math.pi/2
-        calc = Calculate({}, vars={'x': x})
-        string = ''
-        for i in range(100):
-            n = nTerm(i)
-            # print(n)
-            sign = (-1) ** i
-            fact = self.stringFactorial(n)
-            if sign > 0 and len(string) != 0:
-                string += f'+(1/({fact}))x^{n}'
-            elif sign < 0 and len(string) != 0:
-                string += f'-(1/({fact}))x^{n}'
-            else:
-                string += 'x'
-        return calc.computeExpression(string)
-        # return calc.computeExpression('x-(1/(3*2))x^3+(1/(5*4*3*2))x^5')
+        Args:
+            n (int): The non-negative integer to compute the factorial of.
+
+        Returns:
+            The factorial of n.
+        """
+
+        if n == 0:
+            return 1
+        else:
+            return n * self.factorial(n - 1)
 
     def sin(self, x: float)->float:
         """Compute the sine of an angle.
@@ -191,7 +206,7 @@ class Calculate:
         n = 15  # Number of terms in the series
         sin_x = 0
         for i in range(n):
-            sin_x += (-1)**i * x**(2*i+1) / math.factorial(2*i+1)
+            sin_x += (-1)**i * x**(2*i+1) / self.factorial(2*i+1)
         # print(sin_x)
         return sin_x
 
@@ -208,7 +223,7 @@ class Calculate:
         n = 15  # Number of terms in the series
         cos_x = 0
         for i in range(n):
-            cos_x += (-1)**i * x**(2*i) / math.factorial(2*i)
+            cos_x += (-1)**i * x**(2*i) / self.factorial(2*i)
         # print(cos_x)
         return cos_x
 
@@ -245,8 +260,8 @@ class CartGraphing:
         # self.domain = [-100, 100]
         # self.domain = [-250, 250]  # the values x or t take
         self.domain = [-100, 100]  # the values x or t take
-        self.dp = 3  # number of decimal places to round x to
-        self.step = 1e-3  # step size for incrementing x
+        self.dp = 2  # number of decimal places to round x to
+        self.step = 1e-2  # step size for incrementing x
 
     def plotCoords(self) -> List[List[float]]:
         """Compute the (x, y) coordinates of the function over the specified domain.
@@ -273,7 +288,7 @@ class CartGraphing:
             self.coords.append([x, y])  # append the computed coordinate
             x += self.step
             x = round(x, self.dp)
-        return self
+        return self.coords
 
     def createPlot(self, otherCoords: Optional[List[List[float]]] = None):
         """Create a plot of the function using the computed coordinates.
@@ -457,55 +472,80 @@ class Matrix3x3(Matrix):
         """Initialize the matrix data by calling the parent class's __init__() method."""
         super().__init__()
 
-    def getDeterminant(self) -> float:
-        """Calculate and return the determinant of the 3x3 matrix.
+    def getDeterminant(self):
+        # determinent of a 3x3 mat requires the matrix of minors, creating the matrix of the 2x2 matrices that make it up
+        element = self.data[0][0]
 
-        Returns:
-            float: The determinant of the matrix.
-        """
-        m33 = Matrix3x3()
-        for x in range(3):
-            currentRow = []
-            for y in range(3):
-                # Indices of the elements to include in the minor matrix
-                if x == 0:
-                    x1 = 1
-                    x2 = 2
-                if x == 1:
-                    x1 = 0
-                    x2 = 2
-                if x == 2:
-                    x1 = 0
-                    x2 = 1
-                if y == 0:
-                    y1 = 1
-                    y2 = 2
-                if y == 1:
-                    y1 = 0
-                    y2 = 2
-                if y == 2:
-                    y1 = 0
-                    y2 = 1
-                # Create the minor matrix and calculate its determinant
-                m = Matrix2x2()
-                m.addEquation([self.data[x1][y1], self.data[x2][y1]])
-                m.addEquation([self.data[x1][y2], self.data[x2][y2]])
-                minor_det = m.getDeterminant()
-                # Add the determinant to the current row, negating it if the sum of x and y is odd
-                if (x+y) % 2 == 1:
-                    currentRow.append(-1*minor_det)
-                else:
-                    currentRow.append(minor_det)
-            # Add the current row to the matrix of minors
-            m33.addEquation(currentRow)
-            currentRow = []
+        # first minor
+        minor = Matrix2x2()
+        minor.addEquation([self.data[1][1], self.data[1][-1]])
+        minor.addEquation([self.data[2][1], self.data[2][-1]])
+        a = minor.getDeterminant()*element
 
-        # The determinant of a 3x3 matrix is the sum of the elements of the matrix of minors,
-        # with the elements in the first row multiplied by the corresponding elements in the original matrix
-        a = m33.data[0][0] * self.data[0][0]
-        b = m33.data[0][1] * self.data[0][1]
-        c = m33.data[0][2] * self.data[0][2]
+        # second minor
+        element = self.data[0][1]
+        minor = Matrix2x2()
+        minor.addEquation([self.data[1][0], self.data[1][-1]])
+        minor.addEquation([self.data[2][0], self.data[2][-1]])
+        b = minor.getDeterminant()*element
+
+        # third minor
+        element = self.data[0][2]
+        minor = Matrix2x2()
+        minor.addEquation([self.data[1][0], self.data[1][1]])
+        minor.addEquation([self.data[2][0], self.data[2][1]])
+        c = minor.getDeterminant()*element
+
         return a-b+c  # det of the first minor - det second minor + det third minor
+    # def getDeterminant(self) -> float:
+    #     """Calculate and return the determinant of the 3x3 matrix.
+
+    #     Returns:
+    #         float: The determinant of the matrix.
+    #     """
+    #     m33 = Matrix3x3()
+    #     for x in range(3):
+    #         currentRow = []
+    #         for y in range(3):
+    #             # Indices of the elements to include in the minor matrix
+    #             if x == 0:
+    #                 x1 = 1
+    #                 x2 = 2
+    #             if x == 1:
+    #                 x1 = 0
+    #                 x2 = 2
+    #             if x == 2:
+    #                 x1 = 0
+    #                 x2 = 1
+    #             if y == 0:
+    #                 y1 = 1
+    #                 y2 = 2
+    #             if y == 1:
+    #                 y1 = 0
+    #                 y2 = 2
+    #             if y == 2:
+    #                 y1 = 0
+    #                 y2 = 1
+    #             # Create the minor matrix and calculate its determinant
+    #             m = Matrix2x2()
+    #             m.addEquation([self.data[x1][y1], self.data[x2][y1]])
+    #             m.addEquation([self.data[x1][y2], self.data[x2][y2]])
+    #             minor_det = m.getDeterminant()
+    #             # Add the determinant to the current row, negating it if the sum of x and y is odd
+    #             if (x+y) % 2 == 1:
+    #                 currentRow.append(-1*minor_det)
+    #             else:
+    #                 currentRow.append(minor_det)
+    #         # Add the current row to the matrix of minors
+    #         m33.addEquation(currentRow)
+    #         currentRow = []
+
+    #     # The determinant of a 3x3 matrix is the sum of the elements of the matrix of minors,
+    #     # with the elements in the first row multiplied by the corresponding elements in the original matrix
+    #     a = m33.data[0][0] * self.data[0][0]
+    #     b = m33.data[0][1] * self.data[0][1]
+    #     c = m33.data[0][2] * self.data[0][2]
+    #     return a-b+c  # det of the first minor - det second minor + det third minor
 
     def invert(self) -> "Matrix3x3":
         """Invert the 3x3 matrix using the determinant and the matrix of minors.
@@ -592,24 +632,23 @@ Multiply the transposed matrix by the reciprocal of the determinant of the origi
 
 
 def solveSystemsOf2Eq(equations, answers):
-    m1 = Matrix2x2()
-    for equation in equations:
-        m1.addEquation(equation)
-    print('MATRIX DATA')
-    print(m1.data)
-    m2 = Matrix2x2()
-    # m2.addEquation(answers)
-    for a in answers:
-        m2.addEquation([a])
-    if m1.getDeterminant() == 0:
-        return None
-    m1.invert()
-    print('matrix 1 ', m1.data)
-    print('matrix 2 ', m2.data)
-    return m1.dot(m2)
     # vars, the names of the variables, in the order they are given
     # equations: 2d array, containing the coefficients of the variables
     # answers: the value of each equation in the system
+    m1 = Matrix2x2()
+    for equation in equations:
+        # add the equations coefficients to the matrix
+        m1.addEquation(equation)
+    m2 = Matrix2x2()
+    # m2.addEquation(answers)
+    for a in answers:
+        m2.addEquation([a])  # add the answers to the matrix
+    if m1.getDeterminant() == 0:  # check if the determinant of the matrix is 0
+        return None
+    m1.invert()  # invert the matrix
+    print('matrix 1 ', m1.data)
+    print('matrix 2 ', m2.data)
+    return m1.dot(m2)  # return the dot product of the matrices
 
 
 def solveSystemOf3Eq(equations, answers):
@@ -619,6 +658,8 @@ def solveSystemOf3Eq(equations, answers):
     m2 = Matrix3x3()
     for a in answers:
         m2.addEquation([a])
+    print('DET ', m1.getDeterminant())
+
     if m1.getDeterminant() == 0:
         return None
     m1.invert()
@@ -709,25 +750,46 @@ class BinomialDist:
         return self.factorial(n) / (self.factorial(k) * self.factorial(n - k))
 
 
+class NormalDist:
+    def __init__(self, mean, std_dev):
+        self.mean = mean
+        self.std_dev = std_dev
+
+    def cumulative_probability(self, lower_bound: float, upper_bound: float)->float:
+        '''The method cumulative_probability calculates the cumulative probability of a normal distribution within a given range.
+
+            Args:
+                lower_bound (float): The lower bound of the range to calculate the cumulative probability for.
+                upper_bound (float): The upper bound of the range to calculate the cumulative probability for.
+
+            Returns:
+                The cumulative probability within the specified range.'''
+
+        # Calculate the z-score for the lower bound
+        z_lower = (lower_bound - self.mean) / self.std_dev
+
+        # Calculate the z-score for the upper bound
+        z_upper = (upper_bound - self.mean) / self.std_dev
+
+        # Use the cumulative distribution function for the normal distribution to
+        # calculate the cumulative probability
+        return 0.5 * (1 + math.erf(z_upper / math.sqrt(2))) - 0.5 * (1 + math.erf(z_lower / math.sqrt(2)))
+
+
+'''This method calculates the cumulative probability of a normal distribution between the given lower and upper bounds. It does this by first calculating the z-score for the lower and upper bounds by subtracting the mean of the distribution from the given bounds and dividing by the standard deviation. Then, it uses the cumulative distribution function for the normal distribution to calculate the cumulative probability by subtracting the cumulative probability of the lower bound from the cumulative probability of the upper bound.'''
 if __name__ == '__main__':
     # param = ParametricGraphing(
     #     '2*cos(t) + 5*cos((2/3)*t)', '2*sin(t)+5*sin((2/3)*t)')
     # param.plotCoords()
     # param.createPlot()
     # trueSin = [[x/10, 10*math.sin(x)] for x in range(-100, 100)]
-    # c = Calculate({}, {'x': 1})
-    # print(c.computeExpression('sin(x)'))
-    g = CartGraphing('10*sin(x)')
-    coords = g.plotCoords()
-    # # print(coords)
-    g.createPlot()
+    c = Calculate({}, {'x': 1})
+    print(c.computeExpression('sin(10π)'))
+    # g = CartGraphing('10*sin(x)')
+    # coords = g.plotCoords()
+    # # # print(coords)
+    # g.createPlot()
 
-    b = BinomialDist(50, 0.5)
-    print(b.cumulative_probability(10, 30))
-# class CreateCartGraph
-
-
-['-10+9--5+-6', '1-2+2/3/8', '5+-3/-7', '5+-5/-3-3-7', '-10/-9-0-5-6', '7+7+8-1/-7', '-9-4-7', '10/-5+4-7*-3/-8', '8*-3-2', '8-0+1/5+-10', '2*0+-2*1+3', '-4/-4+-5*-5*0', '-10-9+4+8', '-9--6*-6+-5+-7-9', '-4--3--8-5', '-6*5/-4+-6+-3', '-7*6+-10/-2+-6', '-6/-8-4/-8', '-7+0-8-4', '9*-5-5/1', '-6--9-1*-6', '-4/-5+2/-8+-4--9', '5/9+-9*-6+-2*5', '-3-9+-6+0', '3+-7--9/9/-3', '-4+-7+3', '3/-2*-5+-1+-6', '2/1*0-7--10/3', '-9+-6--3', '-6-5*3-9', '10*-4+-8', '-5+7-10', '2+-7--4*4', '-1--7/-3+-5', '-10*-8+-5/-10--5', '9*-9-5--9/-2--9', '-3*-10/-8+-5+-8', '7*5+8*-10+-1', '6+-10/8*-2', '7+-6/1', '5*-3/10*10+6+-2', '-3*-3+-8', '-10+-8+-3+-6+-3', '4+8/-3-7-9', '-2+2*3-7', '4-10+-6+-7--1', '4/2-4', '-10/-10+-8*1*-7', '3--9+-6*9*7', '7+0+-8*3', '6/-9*-9--2-6', '-7/9*6*-1/-5-9', '10/6-8+-6/4', '-5-9+1*4*6', '0*6-3/7', '2*1+-9--9', '4-8*2-3/-9--5', '-9+0/4/3+-7', '4-3--4+10', '-1+0+-2*9/10', '-8--6+9*6+-3', '7+-9-1+0*7', '-9*1-7', '2/10/-5/7+-3', '4--10+-5', '-5*0+-7--5+-5+-6', '3+-5-8*7+3', '-7+-3/8/4+1*-9', '-4*-9+-7/-6-3', '-7-9*8*-3', '-1-10/6*4+-10', '-2/-2/4-6--3', '4-6*-4--5', '9+-4*-1+-4*7', '-10*10+-7*5*8-8', '10+-3/5-10--4*-5', '8+-3/3/-10--7', '8--2*0/1+-2+0', '2*1*-1-10/-8', '-8+-8*7+-3-9', '0--9/8+-2/8', '-2*-9/8+-5', '5+-10+-6--9*2', '9--2*9*10+-8/-8', '7/-8+1/-9-3', '9*-7+4*8-2', '4+-9--9/3+-10/8', '3+-10*6+3+8', '5+-3+-6+7+6', '-1/-9/2+-9+4*-10', '-3+7/6-4', '-8/10-5', '-1+-5/-5+1--7-2', '2/3-4*-6', '-2+-7-8*9+8', '3+-2*-2*-8', '1-4-1', '9+5--7+-8+-10', '10+-4/-8/4', '3*-1/-8*-5+10-2', '0+-10*2+0-10/9', '8*2+-9', '1*-10+-2-0', '5-7--6*-1', '-2+3+-7', '0*-6+9-7+-4/-6', '-1*-9+-8-0/6', '-7*-6/5/-7-4', '-9+-7*1+-3', '8-10+4-2+-3', '10/-3/-6+3-1', '-4*3*-6-2+-6', '6/3+-2*-1*3', '7+5-5/1-6', '-5*3--5+-1/9--3', '2/5+-7*-3*-5', '-8/-3/-6/-4+-2+-6', '-2/7--5+-5*7', '-3/-5+-10/-8', '7-9*-9/6', '4--7+-6', '-8-8/-3', '4*2+-7*10--9*6', '-1+-6+-7-10*9*3', '-2*0-6*8*8+-4', '-1/-9+-10+-5+2', '3+6+-8*-7*6', '-1-5+-4*-7*-8', '4*6+-6*9', '2-9*4+-2', '10/5--3+-8/1', '9--2-7', '-2/4-2+-2', '5*-2-7', '7+-7*2*-4', '4-9--6/4-5', '6+0-7*1', '0-10+9*9/8-7', '-3--9-6--10+2', '-7+-6*1', '10*-6-1--8', '-8/5*-8-2--10', '1+-5+8*-3', '-10+10+-1/1', '4*-10+-10', '-10-3/5/-2*6', '-2--10--9+4+-5', '-4*-1+-9--8/-9', '-5/-9-4/-3*8*5', '-3-5-0*-8-8', '-9--1-3/-6', '-9-4-6*-10', '4*7+-5*-10', '0--5/-7*6-1', '6+2--2*-7-0--3', '-4*-3+9/-9-7/-7', '5+3+-6', '8+4-7/-2--2*5', '2/-4-10/-9/4', '-2-2/4+-9', '-6-5-5*-4*10*4', '-9-9--4+-1/10', '-1/-6-3+2+-4+-2', '-8--8/-9+-4', '-6--2/-2-7*-3/4', '-9/4/-9/4+-6', '-2*5*7-3*3', '-1+-10/-9--4/-9*9', '10-4/-4/3--6', '9+-3/10', '9-1+-6--5+-10*-9', '8*1-3/3/-8*0', '-8/10+-7/6-5', '7-4+6*0/8/7', '6-3*7*-6', '-2/-9+5--8--5-5', '1/-7--2*-8+-4', '10-1*8--9', '-9/-8*-4+-7', '6/1/10/9/4-8', '10/9--7+-8/4', '-5-5*-2', '-5/-10--2+-7-6/-9', '9/-5*-8-10', '-9/6-1--8-5*5', '7/10-2', '6--2+-10/-5*10', '-10--4*-4*0-3', '7*-6+-10/7', '-2--3*9-8--7', '-7--6/10-8/10', '1+-7--8', '4*3*5+-4', '-10/-4/1-6', '-4*7--2+-6', '-3*-4*9*5-2', '-5--8-7', '10/-7*10-10', '4/2+-1', '-6-4/-5*-5', '-6+2--4-3/-5', '9-10*3*-3/-6/9', '2*4*8*-7-2', '-10+-6*4', '9/-3+-10+0-7/-5', '7-3+1+-5+3', '4-4*0+7', '1/5--2*8-7', '-1/-4+-4/6--8', '-1+5-8*5/2', '4--2+-9/-2', '0-5-8+-6-8', '7-2*5', '4*4-8', '-9+-7-8-9*7', '10-8+8*-10', '3*4*5-9--4+9', '3--1-2/-7/4/-3', '-4*-7+-3-10', '-5/3--7/6*-10+-6', '4*-4+-9/-9+3', '-4+-8*-4', '10/-2*-5-9-1/-10', '9/5+-8/-7+9', '6*7*3-3+-5+-9', '9-6*9', '1+-5/-2', '6+0-7*-7*-7', '3+-1*-3*-10--2', '1-9-7/-5+3+-3', '-3-0*9+-6', '9*-3+8-8+-10', '-4-9-6+9/-8', '8--9-2+10-10', '4+-5/10-7', '-7/-4*-5+-9', '4/-4/3-8', '1/5/10+2--6-0', '-8-10*9*-3/6', '1+-9/5*6--4', '5-10+-10/-5', '1/9+-7/-9*3', '-7+-9*-2--1', '3+-10/10-4-7', '10-4/-4-6*6', '-7*6-3-3', '-10+-5+-3*-9', '3-2+10-7', '7-3*-6*-8', '8+-10--1+5', '5--9-8-5-2', '-8+-5*0-9--7--4', '-7/-6+-4', '1*6+-6*-6', '-5/5/-2-10/-3--8', '7+6+-3*-3+6', '10--1-0+4', '9/-5+-4-10*9/-1', '8/4+-3*2', '-2--8+-4+-3', '1/2+-3', '-9/3-5+1+-4', '2*-8-9', '7/10+-9', '8-10/-6/-1--1/10', '-5/5-1+10', '10+-5-0/10/-2', '2/5+-10-3/-4+2', '-8-0+-7*-9+8--4', '-10/9+4+-7+5--8', '-2-2*-2-3-2', '-10*-7*4*-6+-5', '3--8*-1*10-1', '-2/8+3-5*-7', '-7/9*10-3', '7*3/2+-7/-3+10', '-10+3-10-8-7+4', '7--8-2*4', '0/-6*-6+-4*9', '1--1*9*5-6', '-10/-1-6*6-10--7', '10+2+-3-5/-10/6', '2*-7--1+-5', '1-10/-3/-7-9', '4*10/3*-7+-8', '-1/5-10/8/7', '-5+-9+-1/8', '0/-5*5+-7*-10', '9*0+-4--10', '1*4+-2--9', '-6-3+3', '6-5/-6*3-9', '-5+-6*6/-9-9', '9+-1--1--10*1', '5-8-1-2+-3', '6/9*5/-10-9', '1-4*-2/-3/-3*10', '-5/6-0+-8--9', '-6/2/7-8', '4*4+-6', '8--10*-8+-9--9', '4+-5-1*4', '-6+1+-3', '2/-9*-5-5', '7/4-1*3*-7', '4/3+-5', '7*3*8-7', '8+8-2/-1+6+-9', '-3-2--9', '-2/9-10*-4', '1+-4+-1*1', '5+-8/9+-4--2', '-2/-6*-4-0', '4/-10-8+-9--2', '-10/9+-3/1', '-10-2+4-5/-7', '-6-0/-10/6*3', '4/-9--1-7*-4', '6*5-10', '-1+-7/-10-5/-5', '-3--9*9*7+-1', '9+-6/9/-7', '-1+8-2*-7*3', '-8*1-8/7+2/-5', '-2-2/-7', '-3*2-8+-8', '-4+5-2*4--10+8', '0*-3+2+4-10', '4+4--6-7*-4*-5', '-10*3-2+1/-10*-7', '-2*-10+-3', '-3-5*0+-5+3', '7+6-2+-8', '-9*8/4-10+-1', '0-1/-7--1--2-10', '5*-2+-2*-7/-7', '-10*-4/5+-7/-1', '10--1+-6/7', '9/8+-2*-6/2', '6*5*-5-3*4-7', '-9+1+-2-3', '3/-5-7/-10-4-1', '-4+-10--8', '-1--4/-10+-5', '10+-1--8/-8/-4', '5+5/-6-1', '2/5--1+-7*4', '10/9-8-5*1', '3-4+4', '-10--8+-6', '7+-6+-4-7*-2', '4+-6-8', '-3-2/9+-4', '7+-4*9*-3/1', '-9*3+8+-8*5-9', '-1+-6--9', '-7*-3-9*9*5/-8', '-3--4--5-2+-2*-9', '-6--7--7-0-10', '-6*6+-7/4', '8*-3-6-0', '3-3/-10-2', '8-4/-7+9', '-2+0*-4+-7+5', '7/-10-3*-7--5--2', '-4+3--4-0', '6*-2--5+-10', '-1*-3+-4*10--8', '-9--1/2/-4+-10', '8-1+-7', '-10*-6+-6--5/-10', '-4-9*-2*1--4--5', '-7+-2/3--1', '-6-0+-4--2/-6', '-4+-5+-7-2--4*-5', '-8/8+-7*-7*-8', '-7-1*5--1+2-7', '3+3-3-7', '-6-1+0*5*4', '8--1-7+5+-7', '-1--8+-3/1', '8/-8+-10', '10*-10+-1/-9*10', '10+-3/5*-3*2', '-4--9+-8', '-3-9/6', '10/-10*-10-8', '2*0--7--1+-7/-4', '1--7-0/-4-9+-6', '-8+-9*8--9', '4*-9+-1+3', '4-4*1-10-4+7', '10*-7+-9--10*2', '6-0+-9+10/5', '1+-9+5/5', '6+-10*-8--7', '-9+-8-10--5', '-5*1-4/9*0', '4/-9-5*10+3', '6+-4+-1-2/-6', '7-2*-1+2', '4--8+-7--2*-9', '0+5/-3-3/6*6', '2-2/-5*-6+3', '-5*9+-4+6*-10*-5', '-10-0+9', '5+-1-2*-7*6', '4+5+-2', '3*-1+-3--3', '-8+1+10/-2+-6+-5', '-2+-5*7/-8', '3+8+0+-9+-7/5', '7+-7*-6+-8', '-4+-8/10*-3', '-6/1+-3-1', '-2+-3--3', '-7*-5*-4+-8-8+3', '10*4*-8+-8/10*-7', '9*3*8--1+-2*-4', '-8/2-5+10+-2', '10+0-0+8--2', '-7-6--9--10', '-9/5+-10--7', '9+-7*5*7', '6--1*0+-7', '-2*4-8-8', '5*-5+-4', '-4/-7+-5-6', '2+-1+-8+-9/4', '9/2-10--4', '5*-5-10/8/10*3', '-4*-2/10+1+-7*5', '7+-4*-8/-2', '-10+-2*2--5', '10/2/-8-10', '4-3/6-3', '-1+-10*-1', '-1--3-2/-7', '-3+2--4/7+6+-4', '-9*5-10*0-10/4', '10+-1/10+9', '5+2*0+7+-5', '-7/8*-8/-1-10', '-3-4*-4--9/-5', '-2+-7*8', '3+-9/-1-5', '-7/-8-7+10', '-9--10-6-7-6-0', '-1/5--8-9', '5-9-4/-4', '1+10-1-5', '-7--1+1-9/9', '8+-6*-9/3+-5', '6/8+-1', '-6+-6/6/1', '5/6/1*-3/-6-10', '2/-1*6-5--10', '8*10-10--3', '-6-1-9/8+-5', '-9/8/1/-6+-2/7', '1+1+-8', '-9/-7*6-9-1', '9+-7-8/10-6*5', '3-9+7*9', '-7/2-5+-4', '6-2+-6*3', '7/-6/-8--1--7+-10', '10-4/-4/-4+-2', '2+-4/3*-10', '6*5-2-7+8', '-8-9--1+2/-4', '-7+-9*-6*-9', '-2-6+-8+3', '5*-1/4-4', '8-2/1+1', '-6*-4+-9--10', '-8-10*1+-6', '-4-10-7/5', '1--2+9-10', '-3/-3+-4/9+6', '7+5/6-8+-3', '-7*8+7--10-9/3', '3+7*9-8--8', '9/-1+5-6', '5-4*9', '-4+3+4*0/5+-5', '-3+-10+2-1', '-6+7-6-7', '-5-9--8*-7--8*-8', '2/6+-1', '-9--4-1*-3/-1', '-4+-3+7/-9/-9-7', '8/2-9/4*3', '4-8+-9*-4+10+-2', '6+-6/4', '4+-3/4', '-3-5-6-9', '-4+10/10+-6/5/2', '8*2-0+-8', '1--4+-6--6*-9', '-8/-10+-8+-1', '6+-5/6--8-7/-4', '4+7*9-6', '9+-1*-1--4*4', '4*-5*-6+-3', '5/-3+-8+-6*-10-7', '8+-4+-3',
- '-1+4+3+-4*10--8', '6/-2+-5/7', '4*5+-3+6', '10-0*0--4*3--7', '6/3/-3+-4', '10-8*-7+4+-5*-10', '2-9-8+-10*-3+-9', '10*-6+3+-4+10', '9+1*2--2-8--5', '-5+-2+6-3/-10', '2-1/-6/9', '2+-5*10*1', '5*-9+-10+10', '0+1/2+-1*-1-1', '4*1/-3-9+7', '0/-2/4*8+-3', '8-5/-2', '2+9*-1/8-3', '2*10+-3+-8', '8+7/-7*-3+-9', '8--4*-5+5+-10+-3', '8+0+-9/10*-6', '-5*-6/3*4/-8-3', '-8--2*3-6/-10+-7', '1+-7*-9--7+-8', '-1+-4-8--1+-3', '8/5*1-1', '10/-6+-3', '-6*5-2/5', '6/-9/5*-3+-8', '-2/10+-7*5+6', '8+-5/-10--4', '-5+5/4+-1+-2', '-9*9/-6+-10', '-7/10+-9*10', '-4/3--1+6+-10', '1+-5*3', '-6+-1/4-6', '4-8-5*-6--10', '-2-10/9', '-5+-5-0--2', '-1+0+-3*-5/-8', '4+-9/3--5', '-10/-9*-9-10*5', '7*-6*4/2+-1', '1+0+-5+6', '-7/4+-10*-5--8', '-6--4/-4-3--9',
- '5+-2*6+7', '-1+3+-5*1', '6/-3*-9--7*-9+-6', '3+-3--3+8', '0+7/-5+-4-3', '8/-8+-4/7', '10*5+-2*1*-7', '-2+-2--8+8', '-7+-8--10*7*-1+2', '-10/4-3', '-4/3/-1+-9', '5/10-6+5/4', '-1-9*-7', '4+-1+-9*-10', '0/10+-4+6', '-1+8*2-0*9', '6-5+6--1-8', '-6*-5-2-0', '8--4--8+-6', '7+2-2--5/-5', '10--3*-10+-9/-10', '10/3-4+1+-8', '-4*-3+-9*9', '2/-6*-5-5/-10--9', '-4+-9+-10+-5', '-7+-1-10', '9/2-6', '4-7/1/8', '8*6-7-4--7/5', '7/-9+1+-1*8--9', '-4+-8--2+3/-8', '-10*0-10--8/5', '-1--8--1/9-4-10',
- '9+-2/-6+8+-8', '4+1+-2/10*9/5', '-10-8-9*9+6--5', '-5--8/-5+-5-1', '-1+-2+4/2', '1+5*8-7+0', '7-9-5', '2*-8/1+-5*-5', '-8*-9/-3/-1--3+-7', '-3*-3*4+-8+-9', '-9+-7/-5', '8-0+-10/-7*4+8', '2+-3*-5--1', '0+-8+-8*0', '5/-8+-9+10--10', '-3/-5-9-10', '8--10--9+-2', '7/10/-9+-9+8/7', '6/-6--10-8+-1*-1', '6/4-2']
+    # b = BinomialDist(50, 0.5)
+    # print(b.cumulative_probability(10, 30))
+    # class CreateCartGraph

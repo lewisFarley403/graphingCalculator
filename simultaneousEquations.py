@@ -18,6 +18,9 @@ class EquationViewer(TexText):
 
         self.changeUnknown(0, '')
 
+    def remakeUnknowns(self):
+        self.unknowns = ['' for i in range(self.numUnknowns+1)]
+
     def changeUnknown(self, index, value):
         self.unknowns[index] += str(value)
         self.clearCanvas()
@@ -60,19 +63,20 @@ class SimScreen2Eq(calculateScreen.Ui_MainWindow):
             res = solveSystemsOf2Eq([eq1, eq2], [ans1, ans2])
             print(res == None)
             if res == None:
-                l = QtWidgets.QLabel('NO SOLUTIONS')
+                self.l = QtWidgets.QLabel('NO SOLUTIONS')
             else:
                 x = res[0][0]
                 y = res[1][0]
                 print(x, y)
-                l = QtWidgets.QLabel(f'x = {x}, y = {y}')
-            self.graphLayout.addWidget(l)
+                self.l = QtWidgets.QLabel(f'x = {x}, y = {y}')
+            self.graphLayout.addWidget(self.l)
             # set answers on screen here
 
         else:
             self.currentIndex += 1
 
     def setupUi(self, MainWindow, numUnknowns=2):
+        self.numUnknowns = numUnknowns
         # calling the parents class, this keeps all the functionality and allows me to keep the method names consistent, but still modify this method
         super().setupUi(MainWindow)
         self.eq1View = EquationViewer(numUnknowns)
@@ -91,6 +95,27 @@ class SimScreen2Eq(calculateScreen.Ui_MainWindow):
             self.eq2View.changeUnknown(self.currentIndex-3, value)
 
             # edit the second equation
+    def forDel(self):
+        print('in del')
+        try:
+            self.graphLayout.remove(self.l)
+        except Exception:
+            # the user has clicked del without clicking equals
+            pass
+
+        self.values = [[], []]  # each array for each equation
+        self.selected = False
+        self.eq1 = []
+        self.eq2 = []
+        self.eq1View.remakeUnknowns()
+        self.eq2View.remakeUnknowns()
+
+        self.currentIndex = 0
+        # self.eq1View = EquationViewer(self.numUnknowns)
+        # self.eq2View = EquationViewer(self.numUnknowns)
+
+        self.eq1View.changeUnknown(0, '')
+        self.eq2View.changeUnknown(0, '')
 
 
 class simScreen3Eq(SimScreen2Eq):
@@ -99,6 +124,18 @@ class simScreen3Eq(SimScreen2Eq):
         self.values = [[], [], []]  # each array for each equation
         self.eq3 = []
         # solveSystemOf3Eq
+
+    def forDel(self):
+        super().forDel()
+        try:
+            self.graphLayout.remove(self.l)
+        except Exception as e:
+            # no answer
+            print(e)
+        self.eq3 = []
+        self.eq3View.remakeUnknowns()
+        self.eq3View.changeUnknown(0, '')
+        self.values = [[], [], []]
 
     def forEqual(self):
         if self.currentIndex < 11:
@@ -116,6 +153,7 @@ class simScreen3Eq(SimScreen2Eq):
             ans2 = float(self.eq2View.unknowns[-1])
             ans3 = float(self.eq3View.unknowns[-1])
             res = solveSystemOf3Eq([eq1, eq2, eq3], [ans1, ans2, ans3])
+            print('RES = ', res)
             if res == None:
                 self.l = QtWidgets.QLabel('NO SOLUTIONS')
             else:

@@ -7,6 +7,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from texRenderWidget import TexText, TexTextWithDomain
 from threading import main_thread
 import calculateScreen
+from PyQt5.QtWidgets import QMessageBox
 
 
 # todo:
@@ -77,17 +78,32 @@ class GraphingScreen(calculateScreen.Ui_MainWindow):
         # for eq in self.equations[:-1]:
         #     graphs.append(CartGraphing(eq.getEquation()).plotCoords())
         # mainPlot.createPlot(otherCoords=graphs)
-        allCoords = []
-        for eq in self.equations:
-            if eq.type == 'normal':
-                p = CartGraphing(eq.getEquation())
-                coords = p.plotCoords()
-                allCoords.append(coords)
-            else:
-                p = ParametricGraphing(eq.x.getEquation(), eq.y.getEquation())
-                p.plotCoords()
-                allCoords.append(p.coords)
-        p.createPlot(otherCoords=allCoords)
+        try:
+            allCoords = []
+            for eq in self.equations:
+                if eq.type == 'normal':
+                    p = CartGraphing(eq.getEquation())
+                    coords = p.plotCoords()
+
+                    allCoords.append(coords)
+                    # print('graphing a normal function')
+                    # print(allCoords)
+                else:
+                    p = ParametricGraphing(
+                        eq.x.getEquation(), eq.y.getEquation())
+                    p.plotCoords()
+                    allCoords.append(p.coords)
+            p.createPlot(otherCoords=allCoords)
+        except Exception as e:
+            print(e)
+            msg = QMessageBox()
+
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Error")
+
+            msg.setInformativeText('Invalid expression')
+            msg.setWindowTitle("Error")
+            msg.exec_()
 
     def rightArrow(self):
         self.equations[self.index].switchEquation()

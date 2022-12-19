@@ -7,6 +7,8 @@ from texRenderWidget import TexText
 from calculateScreen import Ui_MainWindow
 from simultaneousEquations import simScreen3Eq, SimScreen2Eq
 from graphingScreen import GraphingScreen
+from binomal import BinomialWidget
+from normal import NormalWidget
 
 
 class currentApp(object):
@@ -20,6 +22,9 @@ class currentApp(object):
 
         self.sim2eq = SimScreen2Eq()
         self.sim3eq = simScreen3Eq()
+        self.binomial = BinomialWidget()
+        self.normal = NormalWidget()
+
 
 # 114
         # self.sim3eq.setupUi(MainWindow)
@@ -27,7 +32,8 @@ class currentApp(object):
         self.graphing = GraphingScreen(MainWindow)
         self.currentIndex = 1
         self.switch.clicked.connect(self.foo)
-        self.screens = [self.calc, self.sim2eq, self.sim3eq, self.graphing]
+        self.screens = [self.calc, self.sim2eq,
+                        self.sim3eq, self.graphing, self.binomial, self.normal]
 
     def foo(self):
         # do this for all pages

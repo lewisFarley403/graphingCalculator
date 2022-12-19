@@ -6,7 +6,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5 import QtCore, QtGui, QtWidgets
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from functionalityPages import Calculate, BinomialDist
+from functionalityPages import Calculate, BinomialDist, NormalDist
 
 
 import sys
@@ -15,14 +15,14 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QMessageBox
 
 
-class BinomialWidget(QtWidgets.QWidget):
+class NormalWidget(QtWidgets.QWidget):
     def setupUi(self, MainWindow):
         # create the input fields
 
-        self.nInput = QtWidgets.QLineEdit()
-        self.nLabel = QtWidgets.QLabel('N:')
-        self.pInput = QtWidgets.QLineEdit()
-        self.pLabel = QtWidgets.QLabel('P:')
+        self.meanInput = QtWidgets.QLineEdit()
+        self.meanLabel = QtWidgets.QLabel('Mean:')
+        self.stdvInput = QtWidgets.QLineEdit()
+        self.stdvLabel = QtWidgets.QLabel('Standard Deviation:')
         self.lower_bound_input = QtWidgets.QLineEdit()
         self.lower_bound_label = QtWidgets.QLabel('Lower Bound:')
         self.upper_bound_input = QtWidgets.QLineEdit()
@@ -35,10 +35,10 @@ class BinomialWidget(QtWidgets.QWidget):
 
         # create a layout to hold the input fields and button
         self.gridLayout = QtWidgets.QGridLayout(self)
-        self.gridLayout.addWidget(self.nLabel, 0, 0)
-        self.gridLayout.addWidget(self.nInput, 0, 1)
-        self.gridLayout.addWidget(self.pLabel, 1, 0)
-        self.gridLayout.addWidget(self.pInput, 1, 1)
+        self.gridLayout.addWidget(self.meanLabel, 0, 0)
+        self.gridLayout.addWidget(self.meanInput, 0, 1)
+        self.gridLayout.addWidget(self.stdvLabel, 1, 0)
+        self.gridLayout.addWidget(self.stdvInput, 1, 1)
         self.gridLayout.addWidget(self.lower_bound_label, 2, 0)
         self.gridLayout.addWidget(self.lower_bound_input, 2, 1)
         self.gridLayout.addWidget(self.upper_bound_label, 3, 0)
@@ -58,19 +58,16 @@ class BinomialWidget(QtWidgets.QWidget):
 
         # get the values from the input fields
         errors = []
-        n = int(self.nInput.text())
-        if n <= 0:
-            errors.append('invalid n ')
-        p = float(self.pInput.text())
-        if 1 <= p < 0:
-            errors.append('invalid p ')
+
+        n = int(self.meanInput.text())
+
+        p = float(self.stdvInput.text())
+        if p <= 0:
+            errors.append('invalid standard devation ')
 
         lower_bound = int(self.lower_bound_input.text())
-        if lower_bound < 0:
-            errors.append('invalid lower bound ')
         upper_bound = int(self.upper_bound_input.text())
-        if upper_bound < 0:
-            errors.append('invalid upper bound ')
+
         if len(errors) != 0:
             # error
             msg = QMessageBox()
@@ -84,7 +81,7 @@ class BinomialWidget(QtWidgets.QWidget):
             sys.setrecursionlimit((n+1)*(lower_bound+1)*(upper_bound+1))
             print(sys.getrecursionlimit())
 
-            distribution = BinomialDist(n, p)
+            distribution = NormalDist(n, p)
             probability = distribution.cumulative_probability(
                 lower_bound, upper_bound)
             self.answer.setText(f'p: {str(probability)}')
