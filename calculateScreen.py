@@ -15,6 +15,7 @@ from matplotlib.figure import Figure
 from functionalityPages import Calculate
 from texRenderWidget import TexText
 # import switchingWidget
+from utils import Stack
 from PyQt5.QtWidgets import QMessageBox
 
 WIDTH = 800
@@ -30,6 +31,7 @@ class Ui_MainWindow(QtWidgets.QWidget):
         self.flags = {'sqrt': False, 'fractDenom': False, 'fractNum': False}
         self.texEq = r''
         self.expressionForCalc = ''
+        self.expressionStack = Stack()
 
         MainWindow.resize(1000, 1000)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
@@ -288,15 +290,23 @@ class Ui_MainWindow(QtWidgets.QWidget):
 
     def forDel(self):
         # overide when another screen inherits and does whatever it wants with the delete function
-        self.texEq = r''
-        print('in for del')
-        self.expressionForCalc = ''
-        self.texRender.clearCanvas()
-        self.refreshDisplay('')
+        # self.texEq = r''
+        # print('in for del')
+        # self.expressionForCalc = ''
+        # self.texRender.clearCanvas()
+        # self.refreshDisplay('')
+        print(self.expressionStack.getLen())
+        if self.expressionStack.getLen() != 0:
+            self.texRender.undo()
+            self.expressionStack.pop()
+        # todo stack in texText too
 
     def refreshDisplay(self, value, forCalc=True):
+        print(self.expressionStack.getList())
         self.texRender.refreshCanvas(value)
         if forCalc == True:
+            # eventually will be value and some other variables to do with the state, like if were altering the top or bottom of a fraction shit like that
+            self.expressionStack.push([value])
             self.expressionForCalc += value
 
     def rightArrow(self):
@@ -314,6 +324,7 @@ class Ui_MainWindow(QtWidgets.QWidget):
         # example fraction syntax r'$\frac{9}{3}$'
         print('fract button')
         self.refreshDisplay(r'\frac{', forCalc=False)
+        self.expressionStack.push('(')
         self.expressionForCalc += '('
         self.flags['fractNum'] = True
 
@@ -366,9 +377,18 @@ class Ui_MainWindow(QtWidgets.QWidget):
         self.pushButton_23.setText(_translate("MainWindow", "-->"))
         self.pushButton_24.setText(_translate("MainWindow", "<--"))
 
+    def turnStackToString(self):
+        stackList = self.expressionStack.getList()
+        exp = ''
+        for el in stackList:
+            exp += el[0]
+        return exp
+
     def forEqual(self):
         print(f'COMPUTING {self.expressionForCalc}')
         try:
+            exp = self.turnStackToString()
+            self.expressionForCalc = exp
             result = self.calc.computeExpression(self.expressionForCalc)
             self.texRender.setAnswer(str(result))
         except Exception as e:

@@ -45,6 +45,7 @@ class Calculate:
         Returns:
             The value of the computed expression.
         """
+        print(RPN.rpn)
         paramStack = Stack()
         # print(f'computing {RPN.rpn}')
         # print(f'rpn stack: {RPN.rpn}')
@@ -52,6 +53,7 @@ class Calculate:
 
             if item not in precedence:  # if it is a number
                 paramStack.push(item)
+
             else:
 
                 # need to computer whatever operator is in here
@@ -784,12 +786,7 @@ if __name__ == '__main__':
     # param.createPlot()
     # trueSin = [[x/10, 10*math.sin(x)] for x in range(-100, 100)]
     c = Calculate({}, {'x': 1})
-    print(c.computeExpression('sin(10π)'))
-    # g = CartGraphing('10*sin(x)')
-    # coords = g.plotCoords()
-    # # # print(coords)
-    # g.createPlot()
+    print(c.computeExpression('cos((x))sin(6(x))'))
 
-    # b = BinomialDist(50, 0.5)
-    # print(b.cumulative_probability(10, 30))
-    # class CreateCartGraph
+    print(c.computeExpression('5sin(6(x))'))
+    print(5*math.sin(6))

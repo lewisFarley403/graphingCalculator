@@ -78,11 +78,13 @@ class GraphingScreen(calculateScreen.Ui_MainWindow):
         # for eq in self.equations[:-1]:
         #     graphs.append(CartGraphing(eq.getEquation()).plotCoords())
         # mainPlot.createPlot(otherCoords=graphs)
+
         try:
             allCoords = []
             for eq in self.equations:
                 if eq.type == 'normal':
                     p = CartGraphing(eq.getEquation())
+                    print(f'the equation is {eq.getEquation()}')
                     coords = p.plotCoords()
 
                     allCoords.append(coords)

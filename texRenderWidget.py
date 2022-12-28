@@ -14,6 +14,8 @@ from functionalityPages import Calculate
 import matplotlib.pyplot as plt
 from typing import Optional
 
+from utils import Stack
+
 
 class TexText(QtWidgets.QWidget):
     """A widget for displaying and editing a mathematical equation.
@@ -32,7 +34,7 @@ class TexText(QtWidgets.QWidget):
         """
         super().__init__()
         self.type = 'normal'  # Set text type to normal
-
+        self.stateStack = Stack()
         self.canvasParent = parent  # Set parent widget for the canvas
         self.title = r''  # Initialize title as empty string
         self.answer = r''  # Initialize answer as empty string
@@ -61,6 +63,10 @@ class TexText(QtWidgets.QWidget):
     def refreshCanvas(self, value):
         # Concatenate the current value of the title attribute with the value parameter
         self.title += value
+        self.stateStack.push(self.title)
+        self.__updateDisplay()
+
+    def __updateDisplay(self):
         # Remove the current canvas object from the layout
         self.layout.removeWidget(self.canvas)
         # Create a new canvas object using the updated title and answer attributes
@@ -68,6 +74,16 @@ class TexText(QtWidgets.QWidget):
 
         # Add the new canvas object to the layout
         self.layout.addWidget(self.canvas, 1, 0)
+
+    def undo(self):
+        print(self.stateStack.getList())
+        self.stateStack.pop()
+        state = self.stateStack.peek()
+
+        if state == None:
+            state = ''
+        self.title = state
+        self.__updateDisplay()
 
     def clearCanvas(self):
         self.title = r''
@@ -77,6 +93,11 @@ class TexText(QtWidgets.QWidget):
     def setAnswer(self, ans):
         self.answer = ans
         ans = str(round(float(ans), 4))
+        self.refreshCanvas('')
+        self.stateStack.pop()  # dont want it adding, its an answer
+
+    def setTitle(self, val):
+        self.title = val
         self.refreshCanvas('')
 
     def getEquation(self):
