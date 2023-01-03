@@ -15,6 +15,8 @@ from typing import List, Optional
 class RPN:
     def __init__(self, exp, variables):
         # Store the expression and variables in instance variables
+        self.specialFuncs = ['(', 'sin', 'cos', 'tan', 'ln']
+
         self.variables = variables
         self.exp = exp
         self.precedence = precedence
@@ -41,11 +43,24 @@ class RPN:
         exp = exp.replace(' ', '')
         precedence = self.precedence
         tokens = self.tokens
+        # print(f'TOKENS {tokens}')
         newExp = ''
+        # \b(sin|cos|tan|ln|\()\b
+        result = [_.start() for _ in re.finditer('sin|cos|tan|ln', exp)]
+
+        # print(f'RESULT {result}')
+        for res in result:
+            exp = exp[:res]+' '+exp[res:]
+        # result = re.split(r"\b(sin|cos|tan|ln|\(|\))\b", exp)
+        # print('RESULT :', result)
+        # newExp = ' '.join(result)
+
+        # print(f'EXP {exp}')
         # Insert spaces before and after each token
         for token in tokens:
             for char in exp:
-                if char == token:
+                if token == char:
+                    # print(f'char: {char}')
                     # Space at the start in case the symbol follows from a number
                     newExp += f' {char} '
                 else:
@@ -55,16 +70,16 @@ class RPN:
 
             newExp = ''
             # #print(f'newExp {exp}')
-
+        # print(f'EXP {exp}')
         tokenised = exp.split(' ')  # do the split
-        print(f'TOKENISED FIRST PASS {tokenised}')
+        # print(f'TOKENISED FIRST PASS {tokenised}')
         newTokenised = []
         # remove the unecessary blank characters from subsequent symbols, ie ')*' ->' )  * ' which makes a mess when split
         for i, t in enumerate(tokenised):
             if t != '':
                 newTokenised.append(t)
         tokenised = newTokenised
-        #print('tokenised ', tokenised)
+        # print('tokenised ', tokenised)
 
         newTokenised = []
         skip = False
@@ -74,11 +89,11 @@ class RPN:
             tokenised.pop(0)
             t = tokenised.pop(0)
             tokenised.insert(0, f'-{t}')
-        #print('1', tokenised)
+        # print('1', tokenised)
         # Loop through the tokens
 
         for i, t in enumerate(tokenised[:-1]):
-            ##print(t, tokenised[i+1])
+            # print(t, tokenised[i+1])
             if skip == True:
                 # Skip this iteration
 
@@ -95,7 +110,7 @@ class RPN:
 
             elif t in token and t != '+' and tokenised[i+1] == '-':
                 # print(2)
-                #print('in two ops together')
+                # print('in two ops together')
                 newTokenised.append(t)
                 skip = True
                 minus = True
@@ -109,9 +124,9 @@ class RPN:
             else:
                 # print(4)
                 newTokenised.append(t)
-            #print('2', newTokenised)
-        #print('new tokenised ', newTokenised)
-        #print('tokens ', self.tokens)
+            # print('2', newTokenised)
+        # print('new tokenised ', newTokenised)
+        # print('tokens ', self.tokens)
         # #print(len(tokenised))
         # Handle the special case of a minus at the end (e.g. "5 * 3 -")
 
@@ -120,8 +135,8 @@ class RPN:
             newTokenised.append(f'-{tokenised[-1]}')
         else:
             newTokenised.append(tokenised[-1])
-        #print('new tokenised ', newTokenised)
-        print(f'FINAL TOKENS {newTokenised}')
+        # print('new tokenised ', newTokenised)
+        # print(f'FINAL TOKENS {newTokenised}')
         return newTokenised
 
 
@@ -138,10 +153,11 @@ class RPN:
         Returns:
             List[str]: A list of tokens representing the input expression in RPN.
         """
+        specialFuncs = self.specialFuncs
 
         # Tokenize the expression
         tokenized = self.tokenise(exp)
-
+        # print(f'FIRST IN TOKENISED {tokenized[0]}')
         # Create a stack for the shunting yard algorithm
         s = Stack()
 
@@ -149,13 +165,21 @@ class RPN:
         output = []
 
         # Loop through the tokens
+        newTokenised = []
         for i, t in enumerate(tokenized):
-            if t in ['(', 'sin', 'cos', 'tan', 'ln']:
-                print('in if ', t)
-                print(tokenized[i-1])
-                if tokenized[i-1] not in precedence:
-                    s.push('*')
-                    print('in second if ', t)
+            if t in specialFuncs and i != 0:
+                # print(f'CONSIDERING IF {tokenized[i-1]}')
+                # print(tokenized[i-1] not in ['+', '-', '*', '/'])
+                if tokenized[i-1] not in ['+', '-', '*', '/'] and not(t == '(' and tokenized[i-1] in specialFuncs):
+                    # s.push('*')
+                    newTokenised.append('*')
+
+            newTokenised.append(t)
+            # print(f'NEW TOKENISED {newTokenised}')
+        tokenized = newTokenised
+        # print(f'tokenised {tokenized}')
+        for i, t in enumerate(tokenized):
+
             if t == '(':
 
                 # Push the left parenthesis onto the stack
@@ -186,7 +210,7 @@ class RPN:
         while s.isEmpty() == False:
             x = s.pop()
             output.append(x)
-        print(f'RPN FOR FOR {self.exp} : {output}')
+        # print(f'RPN FOR FOR {self.exp} : {output}')
         return output
 
     def __repr__(self):

@@ -26,6 +26,11 @@ class EquationViewer(TexText):
         self.clearCanvas()
         self.refreshCanvas(self.getStringRep())
 
+    def updateUnknown(self, index, value):
+        self.unknowns[index] = str(value)
+        self.clearCanvas()
+        self.refreshCanvas(self.getStringRep())
+
     def getStringRep(self):
         # x,y for 2
         # xyz for 3
@@ -85,17 +90,28 @@ class SimScreen2Eq(calculateScreen.Ui_MainWindow):
         self.eq2View = EquationViewer(numUnknowns)
         self.graphLayout.addWidget(self.eq2View)
 
+    def getEquationIndex(self):
+        if self.currentIndex <= 2:
+            return 1
+
+        return 2
+
     def refreshDisplay(self, value, forCalc=True):
 
-        if self.currentIndex <= 2:
+        # if self.currentIndex <= 2:
+        #     self.eq1View.changeUnknown(self.currentIndex, value)
+        #     pass
+
+        # else:
+        #     self.eq2View.changeUnknown(self.currentIndex-3, value)
+        if self.getEquationIndex() == 1:
             self.eq1View.changeUnknown(self.currentIndex, value)
-            pass
 
         else:
             self.eq2View.changeUnknown(self.currentIndex-3, value)
 
             # edit the second equation
-    def forDel(self):
+    def forAc(self):
         print('in del')
         try:
             self.graphLayout.remove(self.l)
@@ -117,6 +133,27 @@ class SimScreen2Eq(calculateScreen.Ui_MainWindow):
         self.eq1View.changeUnknown(0, '')
         self.eq2View.changeUnknown(0, '')
 
+    def rightArrow(self):
+        if self.currentIndex != 5:
+            self.currentIndex += 1
+            print(self.currentIndex)
+
+    def leftArrow(self):
+        if self.currentIndex != 0:
+            self.currentIndex -= 1
+            print(self.currentIndex)
+
+    def forDel(self):
+        print('in del')
+        # if self.currentIndex != 0:
+        #     self.currentIndex -= 1
+        if self.getEquationIndex() == 1:
+            print(f'changing unknown {self.currentIndex}')
+            self.eq1View.updateUnknown(self.currentIndex, '')
+            print(self.eq1View.unknowns)
+        else:
+            self.eq2View.updateUnknown(self.currentIndex-3, '')
+
 
 class simScreen3Eq(SimScreen2Eq):
     def __init__(self):
@@ -125,8 +162,16 @@ class simScreen3Eq(SimScreen2Eq):
         self.eq3 = []
         # solveSystemOf3Eq
 
-    def forDel(self):
-        super().forDel()
+    def getEquationIndex(self):
+        if self.currentIndex <= 3:
+            return 1
+        elif self.currentIndex <= 7:
+            return 2
+        else:
+            return 3
+
+    def forAc(self):
+        super().forAc()
         try:
             self.graphLayout.remove(self.l)
         except Exception as e:
@@ -136,6 +181,28 @@ class simScreen3Eq(SimScreen2Eq):
         self.eq3View.remakeUnknowns()
         self.eq3View.changeUnknown(0, '')
         self.values = [[], [], []]
+
+    def rightArrow(self):
+        if self.currentIndex != 11:
+            self.currentIndex += 1
+            print(self.currentIndex)
+
+    def leftArrow(self):
+        if self.currentIndex != 0:
+            self.currentIndex -= 1
+            print(self.currentIndex)
+
+    def forDel(self):
+        i = self.getEquationIndex()
+        if self.currentIndex != 0:
+            # self.currentIndex -= 1
+            pass
+        if i == 1:
+            self.eq1View.updateUnknown(self.currentIndex, '')
+        elif i == 2:
+            self.eq2View.updateUnknown(self.currentIndex-3, '')
+        else:
+            self.eq3View.updateUnknown(self.currentIndex-6, '')
 
     def forEqual(self):
         if self.currentIndex < 11:

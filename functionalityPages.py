@@ -17,11 +17,13 @@ class Calculate:
             config (dict): A dictionary of configuration settings.
             vars (dict): A dictionary of variables and their values.
         """
+        self.lastCalculated=None
         if vars == None:
             self.vars = {}  # letters that have a value attatched to them
         else:
             self.vars = vars
         self.vars['π'] = math.pi
+        self.specialFunctions = ['(', 'sin', 'cos', 'tan', 'ln']
 
     def computeExpression(self, expression: str) -> float:
         """Compute the value of an infix mathematical expression.
@@ -45,7 +47,7 @@ class Calculate:
         Returns:
             The value of the computed expression.
         """
-        print(RPN.rpn)
+        # print(RPN.rpn)
         paramStack = Stack()
         # print(f'computing {RPN.rpn}')
         # print(f'rpn stack: {RPN.rpn}')
@@ -57,7 +59,8 @@ class Calculate:
             else:
 
                 # need to computer whatever operator is in here
-                if item != 'sin' and item != 'cos' and item != 'tan':
+                # if item != 'sin' and item != 'cos' and item != 'tan':
+                if item not in self.specialFunctions:
                     x = paramStack.pop()
                     y = paramStack.pop()
                     # print(f'x: {x}, y: {y}')
@@ -65,11 +68,15 @@ class Calculate:
                     paramStack.push(res)
                 else:
                     x = paramStack.pop()
-                    res = self.computeTrig(item, x)
+
+                    if item in ['sin', 'cos', 'tan']:
+                        res = self.computeTrig(item, x)
+                    elif item == 'ln':
+                        res = self.ln(x)
                     paramStack.push(res)
-
-        return paramStack.pop()  # this is the final value
-
+        self.lastCalculated=float(x)
+        x= paramStack.pop()  # this is the final value
+        return x
     def findInput(self, op1: str) -> float:
         """Find the value of a variable or number.
 
@@ -133,6 +140,7 @@ class Calculate:
             return op2**op1
 
     def computeTrig(self, func: str, x: str) -> float:
+        # print(f'COMPUTING {func} of {x}')
         """Compute the value of a trigonometric function applied to an operand.
 
         Args:
@@ -194,6 +202,37 @@ class Calculate:
             return 1
         else:
             return n * self.factorial(n - 1)
+
+    def ln(self, x: float)->float:
+        # print('in the ln function')
+        x = self.findInput(x)
+        # print('value of x ', x)
+        # Check that x is positive
+        if x <= 0:
+            raise ValueError("x must be positive")
+
+        # Initialize the sum to 0 and the counter to 1
+        result = 0
+        n = 1
+
+        # Use the identity ln(x) = ln(x/e) + ln(e) to reduce x to a value between 0 and 1
+        while x > 1:
+            # Apply the identity
+            x = x/math.e
+            result += 1
+
+        # Use the Taylor series expansion to approximate ln(x)
+        while True:
+            # Calculate the next term in the series and add it to the result
+            next_term = ((-1)**(n+1)) * (x-1)**n / n
+            result += next_term
+
+            # If the next term is smaller than the tolerance, return the result
+            if abs(next_term) < 1e-200:
+                return result
+
+            # Increment the counter
+            n += 1
 
     def sin(self, x: float)->float:
         """Compute the sine of an angle.
@@ -281,15 +320,17 @@ class CartGraphing:
             # compute the value of y with the current value of x
             try:
                 y = calc.computeExpression(self.function)
-            except ZeroDivisionError:
+
+                self.coords.append([x, y])  # append the computed coordinate
+
+            except Exception as e:
                 # asyntope here
-                print('zero')
+                print('error here ', e)
+            x += self.step
+            x = round(x, self.dp)
             # if abs(x) < 1:
             #     print(f'x = {x}, y= {y}')
 
-            self.coords.append([x, y])  # append the computed coordinate
-            x += self.step
-            x = round(x, self.dp)
         return self.coords
 
     def createPlot(self, otherCoords: Optional[List[List[float]]] = None):
@@ -786,7 +827,32 @@ if __name__ == '__main__':
     # param.createPlot()
     # trueSin = [[x/10, 10*math.sin(x)] for x in range(-100, 100)]
     c = Calculate({}, {'x': 1})
-    print(c.computeExpression('cos((x))sin(6(x))'))
+    # x = c.computeExpression('cos((x))sin(6(x))')
+    # # x = None
+    # y = c.computeExpression('65sin(6(x))')
+    # print('answers ', x, y)
+    # print(5*math.sin(6))
+    # Test c.ln function
+    x = 1.0
+    expected = 0.0
+    result = c.ln(x)
+    assert round(abs(
+        result - expected), 3) < 1e-6, f"Failed for x = {x}: expected {expected}, got {result}"
 
-    print(c.computeExpression('5sin(6(x))'))
-    print(5*math.sin(6))
+    x = math.e
+    expected = 1.0
+    result = c.ln(x)
+    assert round(abs(
+        result - expected), 3) < 1e-6, f"Failed for x = {x}: expected {expected}, got {result}"
+
+    x = math.pi
+    expected = 1.1447298858494002
+    result = c.ln(x)
+    assert round(abs(
+        result - expected), 3) < 1e-6, f"Failed for x = {x}: expected {expected}, got {result}"
+
+    x = 10.0
+    expected = 2.302585092994046
+    result = c.ln(x)
+    assert abs(
+        result - expected) < 1e-6, f"Failed for x = {x}: expected {expected}, got {result}"

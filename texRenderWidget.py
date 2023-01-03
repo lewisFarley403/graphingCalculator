@@ -186,6 +186,6 @@ class MplCanvas(FigureCanvas):
         self.title = title
         # self.axes.set_title(self.title, pad=-100)
         self.axes.text(0, 50, self.title, fontsize=20)
-        self.axes.text(1, 50, self.answer, fontsize=20)
+        self.axes.text(0, 30, self.answer, fontsize=15)
 
         # use a lower number to make more vertical space

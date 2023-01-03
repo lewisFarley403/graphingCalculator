@@ -29,6 +29,9 @@ class Stack:
     def getList(self):
         return self.stack
 
+    def clear(self):
+        self.stack = []
+
 
 def readSetting(settingName):
     # setting name, setting

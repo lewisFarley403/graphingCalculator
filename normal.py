@@ -18,6 +18,7 @@ from PyQt5.QtWidgets import QMessageBox
 class NormalWidget(QtWidgets.QWidget):
     def setupUi(self, MainWindow):
         # create the input fields
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
 
         self.meanInput = QtWidgets.QLineEdit()
         self.meanLabel = QtWidgets.QLabel('Mean:')
@@ -34,7 +35,7 @@ class NormalWidget(QtWidgets.QWidget):
         self.answer = QtWidgets.QLabel('Upper Bound:')
 
         # create a layout to hold the input fields and button
-        self.gridLayout = QtWidgets.QGridLayout(self)
+        self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout.addWidget(self.meanLabel, 0, 0)
         self.gridLayout.addWidget(self.meanInput, 0, 1)
         self.gridLayout.addWidget(self.stdvLabel, 1, 0)
@@ -52,7 +53,7 @@ class NormalWidget(QtWidgets.QWidget):
         self.execute_button.clicked.connect(self.execute)
 
         # set the central widget for the main window
-        MainWindow.setCentralWidget(self)
+        MainWindow.setCentralWidget(self.centralwidget)
 
     def execute(self):
 

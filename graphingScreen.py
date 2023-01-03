@@ -38,7 +38,7 @@ class GraphingScreen(calculateScreen.Ui_MainWindow):
 
         self.new.clicked.connect(self.addEquation)
         self.shift.clicked.connect(self.forShift)
-        self.xButton.clicked.connect(lambda: self.refreshDisplay('x'))
+        # self.xButton.clicked.connect(lambda: self.refreshDisplay('x'))
 
         # self.addEquation()
 

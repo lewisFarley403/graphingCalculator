@@ -18,6 +18,8 @@ from PyQt5.QtWidgets import QMessageBox
 class BinomialWidget(QtWidgets.QWidget):
     def setupUi(self, MainWindow):
         # create the input fields
+        MainWindow.setObjectName("MainWindow")
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
 
         self.nInput = QtWidgets.QLineEdit()
         self.nLabel = QtWidgets.QLabel('N:')
@@ -34,7 +36,7 @@ class BinomialWidget(QtWidgets.QWidget):
         self.answer = QtWidgets.QLabel('Upper Bound:')
 
         # create a layout to hold the input fields and button
-        self.gridLayout = QtWidgets.QGridLayout(self)
+        self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout.addWidget(self.nLabel, 0, 0)
         self.gridLayout.addWidget(self.nInput, 0, 1)
         self.gridLayout.addWidget(self.pLabel, 1, 0)
@@ -52,7 +54,7 @@ class BinomialWidget(QtWidgets.QWidget):
         self.execute_button.clicked.connect(self.execute)
 
         # set the central widget for the main window
-        MainWindow.setCentralWidget(self)
+        MainWindow.setCentralWidget(self.centralwidget)
 
     def execute(self):
 
